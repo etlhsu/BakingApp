@@ -21,7 +21,7 @@ import bakingapp.udacity.com.bakingapp.Ingredient.Unit;
  */
 public class RecipeNetworkUtils {
 
-    private static final String REQUEST_URL = "http://go.udacity.com/android-baking-app-json";
+    private static final String REQUEST_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
 
     /**
      * Gets the recipe listings from the internet
@@ -31,7 +31,7 @@ public class RecipeNetworkUtils {
      * @param errorListener    A listener to be triggered when an error has occurred
      * @return Void because the data is returned within the responseListener
      */
-    public static void getMoviesJson(Context context, Response.Listener responseListener, Response.ErrorListener errorListener) {
+    public static void getMoviesJson(Context context, Response.Listener<JSONArray> responseListener, Response.ErrorListener errorListener) {
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, REQUEST_URL,
                 null, responseListener, errorListener);
@@ -123,7 +123,7 @@ public class RecipeNetworkUtils {
                 Step step = new Step();
                 step.setShortDescription(stepData.getString(STEP_SHORT_DESCRIPTION));
                 step.setDescription(stepData.getString(STEP_DESCRIPTION));
-                if(i == 1 && e == 5){
+                if(i == 0 && e == 5){
                     step.setVideoURL(OVERRIDE_VIDEO);
                     step.setThumbnailURL(OVERRIDE_THUMBNAIL);
                 }
