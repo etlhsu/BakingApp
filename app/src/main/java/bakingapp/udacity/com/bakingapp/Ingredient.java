@@ -15,6 +15,9 @@ public class Ingredient {
         this.name = name;
     }
 
+    public Ingredient() {
+    }
+
     public Integer getQuantity() {
         return quantity;
     }
