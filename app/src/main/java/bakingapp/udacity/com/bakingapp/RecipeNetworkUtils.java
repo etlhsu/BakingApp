@@ -31,7 +31,7 @@ public class RecipeNetworkUtils {
      * @param errorListener    A listener to be triggered when an error has occurred
      * @return Void because the data is returned within the responseListener
      */
-    public void getMoviesJson(Context context, Response.Listener responseListener, Response.ErrorListener errorListener) {
+    public static void getMoviesJson(Context context, Response.Listener responseListener, Response.ErrorListener errorListener) {
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, REQUEST_URL,
                 null, responseListener, errorListener);
@@ -71,7 +71,7 @@ public class RecipeNetworkUtils {
      * @return The {@link java.util.ArrayList} that was created based on the given data
      * @throws JSONException When the parser can't find specified data at a specified location
     */
-    public ArrayList<Recipe> parseRecipeJson (JSONArray jsonArray) throws JSONException{
+    public static ArrayList<Recipe> parseRecipeJson (JSONArray jsonArray) throws JSONException{
 
         ArrayList<Recipe> recipes = new ArrayList<>();
         for(Integer i = 0; i < jsonArray.length(); i++){
