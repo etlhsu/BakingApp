@@ -63,6 +63,9 @@ public class RecipeNetworkUtils {
     private static final String UNIT_OZ = "OZ";
     private static final String UNIT_UNIT = "UNIT";
 
+    private static final String OVERRIDE_VIDEO = "https://d17h27t6h515a5.cloudfront.net/topher/2017/April/58ffda20_7-add-cream-mix-creampie/7-add-cream-mix-creampie.mp4";
+    private static final String OVERRIDE_THUMBNAIL = "";
+
     /**
      * @param jsonArray The network response {@link org.json.JSONArray} that will be parsed
      * @return The {@link java.util.ArrayList} that was created based on the given data
@@ -120,6 +123,10 @@ public class RecipeNetworkUtils {
                 Step step = new Step();
                 step.setShortDescription(stepData.getString(STEP_SHORT_DESCRIPTION));
                 step.setDescription(stepData.getString(STEP_DESCRIPTION));
+                if(i == 1 && e == 5){
+                    step.setVideoURL(OVERRIDE_VIDEO);
+                    step.setThumbnailURL(OVERRIDE_THUMBNAIL);
+                }
                 step.setVideoURL(stepData.getString(STEP_VIDEO_URL));
                 step.setThumbnailURL(stepData.getString(STEP_THUMBNAIL_URL));
                 steps.add(step);
@@ -130,6 +137,7 @@ public class RecipeNetworkUtils {
             recipes.add(recipe);
         }
         return recipes;
+
     }
 
 }
