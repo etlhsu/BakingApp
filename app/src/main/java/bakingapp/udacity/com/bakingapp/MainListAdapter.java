@@ -1,6 +1,5 @@
 package bakingapp.udacity.com.bakingapp;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 
 /**
  * An appropriate {@link BaseAdapter} that inflates recipe cards with their data
-*/
+ */
 public class MainListAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<Recipe> data;
@@ -22,17 +21,17 @@ public class MainListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 0;
+        return data.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return null;
+    public Recipe getItem(int position) {
+        return data.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return data.get(position).getId();
     }
 
     @Override
