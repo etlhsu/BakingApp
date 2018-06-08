@@ -1,11 +1,13 @@
 package bakingapp.udacity.com.bakingapp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * A class to describe an object that holds recipe data in an easy-to-use way
  */
-public class Recipe {
+@SuppressWarnings("serializable")
+public class Recipe implements Serializable{
     private Integer id;
     private String name;
     private ArrayList<Ingredient> ingredients;
