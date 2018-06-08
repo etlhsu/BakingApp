@@ -3,6 +3,9 @@ package bakingapp.udacity.com.bakingapp;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.android.volley.Response;
@@ -19,6 +22,7 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity {
 
+    MainListAdapter listAdapter;
     Context context;
     GridView mainList;
 
@@ -39,9 +43,17 @@ public class MainActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                mainList.setAdapter(new MainListAdapter(context,recipes));
+                listAdapter = new MainListAdapter(context,recipes);
+                mainList.setAdapter(listAdapter);
             }
         }, null);
+
+        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Recipe currentRecipe = listAdapter.getItem(position);
+            }
+        });
 
 
     }
