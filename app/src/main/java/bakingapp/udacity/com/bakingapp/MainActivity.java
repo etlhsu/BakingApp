@@ -1,6 +1,7 @@
 package bakingapp.udacity.com.bakingapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Recipe currentRecipe = listAdapter.getItem(position);
+                Intent launchIntent = new Intent(MainActivity.this,RecipeActivity.class);
+                launchIntent.putExtra("data",currentRecipe);
+                startActivity(launchIntent);
             }
         });
 
