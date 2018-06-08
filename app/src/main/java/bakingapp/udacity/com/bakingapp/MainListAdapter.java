@@ -1,6 +1,8 @@
 package bakingapp.udacity.com.bakingapp;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +24,10 @@ public class MainListAdapter extends BaseAdapter {
 
     /**
      * The constructor where you initalized an instance of {@link MainListAdapter}
+     *
      * @param c A valid context that can access a {@link LayoutInflater}
      * @param d A set of recipes in the ArrayList form
-    */
+     */
     public MainListAdapter(Context c, ArrayList<Recipe> d) {
         context = c;
         data = d;
@@ -48,7 +51,7 @@ public class MainListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView.getTag() == null) {
+        if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.card_main, null);
             MainListViewHolder holder = new MainListViewHolder(convertView);
             convertView.setTag(holder);
@@ -61,7 +64,12 @@ public class MainListAdapter extends BaseAdapter {
             Picasso.get().load(data.get(position).getImage()).into(listHolder.recipeImage);
         }
         listHolder.nameText.setText(data.get(position).getName());
-        listHolder.servingsText.setText(data.get(position).getServings());
+        listHolder.servingsText.setText(data.get(position).getServings().toString());
+
+        Resources r = context.getResources();
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 365, r.getDisplayMetrics());
+        int dp = (int) px;
+        convertView.setLayoutParams(new ViewGroup.LayoutParams(dp, dp));
         return convertView;
     }
 
