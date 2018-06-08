@@ -6,6 +6,7 @@ import java.io.Serializable;
 * A class to describe an object that allows easy access to ingredient data
 */
 @SuppressWarnings("serializeable")
+
 public class Ingredient implements Serializable{
     private Integer quantity;
     private Unit unit;

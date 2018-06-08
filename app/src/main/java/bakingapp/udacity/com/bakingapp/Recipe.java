@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * A class to describe an object that holds recipe data in an easy-to-use way
  */
-@SuppressWarnings("serializable")
+
 public class Recipe implements Serializable{
     private Integer id;
     private String name;
