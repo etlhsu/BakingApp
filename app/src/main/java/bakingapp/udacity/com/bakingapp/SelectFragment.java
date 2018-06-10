@@ -4,11 +4,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.LinearLayout;
 
 
 /**
@@ -31,10 +34,18 @@ public class SelectFragment extends Fragment {
         View returnView = inflater.inflate(R.layout.fragment_select,container);
 
         RecyclerView list = returnView.findViewById(R.id.rv_info);
+        //Problem...
 
+        LinearLayoutManager manager = new LinearLayoutManager(getContext());
+        manager.setOrientation(LinearLayoutManager.VERTICAL);
+        list.setHasFixedSize(true);
+        list.setLayoutManager(manager);
+        Log.v("POINT","1");
         if(currentRecipe != null){
             RecyclerView.Adapter adapter = new SelectAdapter(getContext(),currentRecipe);
             list.setAdapter(adapter);
+            Log.v("AMOUNT",String.valueOf(list.getChildCount()));
+            Log.v("POINT","2");
         }
 
         return super.onCreateView(inflater, container, savedInstanceState);

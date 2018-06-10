@@ -3,6 +3,7 @@ package bakingapp.udacity.com.bakingapp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,7 @@ import android.widget.TextView;
 /**
  * A {@link BaseAdapter} that displays a recipe in a nice looking form
  */
-public class SelectAdapter extends RecyclerView.Adapter {
+public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectViewHolder> {
 
     Recipe currentRecipe;
     Context context;
@@ -32,22 +33,23 @@ public class SelectAdapter extends RecyclerView.Adapter {
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View creationView = inflater.inflate(R.layout.card_select, parent);
+    public SelectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View creationView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.card_select, parent,false);
 
         return new SelectViewHolder(creationView);
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder oHolder, int position) {
 
-        SelectViewHolder holder = (SelectViewHolder) oHolder;
+    @Override
+    public void onBindViewHolder(@NonNull SelectViewHolder holder, int position) {
+
         if (position == 0) {
             holder.getHeadText().setText("Ingredients");
             String displayText = "";
             for (int i = 0; i < currentRecipe.getIngredients().size(); i++) {
                 Ingredient currentIngredient = currentRecipe.getIngredients().get(i);
-                String unitText;
+                String unitText = null;
                 switch (currentIngredient.getUnit()) {
                     case CUPS:
                         unitText = "cup(s) ";
@@ -70,13 +72,15 @@ public class SelectAdapter extends RecyclerView.Adapter {
                         unitText = "";
                 }
                 String currentText = currentIngredient.getQuantity().toString() + " " +
-                        currentIngredient.getUnit() + currentIngredient.getName() + "\n";
-                displayText.concat(currentText);
+                        unitText + currentIngredient.getName() + "\n";
+                displayText = displayText.concat(currentText);
+                Log.v("TEXT",currentText);
+                Log.v("DISTEXT",displayText);
             }
             holder.getDescriptText().setText(displayText);
         } else {
             Step currentText = currentRecipe.getSteps().get(position - 1);
-            holder.getHeadText().setText("Step " + String.valueOf(position - 1));
+            holder.getHeadText().setText("Step " + String.valueOf(position));
             holder.getDescriptText().setText(currentText.getShortDescription());
         }
     }
@@ -92,11 +96,11 @@ public class SelectAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return 0;
+        return currentRecipe.getSteps().size() + 1;
     }
 
 
-    class SelectViewHolder extends RecyclerView.ViewHolder {
+    public static class SelectViewHolder extends RecyclerView.ViewHolder {
         private TextView headText;
         private TextView descriptText;
 
