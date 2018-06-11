@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.io.Serializable;
+
 /**
  * A {@link BaseAdapter} that displays a recipe in a nice looking form
  */
@@ -103,7 +105,7 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
     }
 
 
-    public interface OnItemClickListener {
+    public interface OnItemClickListener extends Serializable {
         void onItemClick(Integer position, Recipe currentRecipe);
     }
 

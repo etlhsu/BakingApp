@@ -19,6 +19,7 @@ import android.widget.Toast;
 public class SelectFragment extends Fragment {
 
     Recipe currentRecipe;
+    SelectAdapter.OnItemClickListener listener;
 
     public SelectFragment() {
     }
@@ -26,6 +27,7 @@ public class SelectFragment extends Fragment {
     @Override
     public void setArguments(@Nullable Bundle args) {
         currentRecipe = (Recipe) args.getSerializable("data");
+        listener = (SelectAdapter.OnItemClickListener) args.getSerializable("listener");
     }
 
     @Override
@@ -39,18 +41,7 @@ public class SelectFragment extends Fragment {
         list.setHasFixedSize(true);
         list.setLayoutManager(manager);
 
-        SelectAdapter.OnItemClickListener listener = new SelectAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Integer position, Recipe currentRecipe) {
-
-            }
-        };
-
-        if (currentRecipe != null) {
-            RecyclerView.Adapter adapter = new SelectAdapter(getContext(), currentRecipe, listener);
-            list.setAdapter(adapter);
-        }
-
+        list.setAdapter(new SelectAdapter(getContext(),currentRecipe,listener));
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }

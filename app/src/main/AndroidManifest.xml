@@ -26,6 +26,10 @@
             android:name=".RecipeActivity"
             android:launchMode="singleInstance"
             android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".ViewActivity"
+            android:launchMode="singleInstance"
+            android:parentActivityName=".RecipeActivity"></activity>
     </application>
 
 </manifest>
