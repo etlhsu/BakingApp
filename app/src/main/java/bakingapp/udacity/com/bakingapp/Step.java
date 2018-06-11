@@ -5,7 +5,6 @@ import java.io.Serializable;
 /**
  * A class that describes an object that makes accessing recipe step data easy
  */
-@SuppressWarnings("serializeable")
 public class Step implements Serializable{
     private Integer id;
     private String shortDescription;

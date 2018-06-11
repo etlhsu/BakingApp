@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 
 public class ViewActivity extends AppCompatActivity {
 
-    Step currentStep;
+    Step currentStep = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,6 +15,10 @@ public class ViewActivity extends AppCompatActivity {
         currentStep = (Step) getIntent().getSerializableExtra("data");
 
         RecipeFragment f = new RecipeFragment();
+        Bundle b = new Bundle();
+        b.putSerializable("data",currentStep);
+        f.setArguments(b);
+
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.view_container, f)
                 .commit();
