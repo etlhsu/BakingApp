@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import com.google.android.exoplayer2.ui.PlayerView;
 
 /**
  * Class that defines the RecipeActivity {@link android.support.v7.app.AppCompatActivity}.
@@ -31,7 +34,8 @@ public class RecipeActivity extends AppCompatActivity {
             public void onItemClick(Integer position, Recipe currentRecipe) {
                 if (position != 0) {
                     Intent launchIntent = new Intent(RecipeActivity.this, ViewActivity.class);
-                    launchIntent.putExtra("data", currentRecipe.getSteps().get(position - 1));
+                    launchIntent.putExtra("data", currentRecipe);
+                    launchIntent.putExtra("start",position - 1);
                     startActivity(launchIntent);
                 }
             }

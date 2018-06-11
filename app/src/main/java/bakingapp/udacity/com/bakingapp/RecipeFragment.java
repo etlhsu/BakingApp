@@ -10,10 +10,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -28,8 +28,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.Serializable;
 
 
 /**
@@ -38,6 +37,8 @@ import java.net.URL;
 public class RecipeFragment extends Fragment {
 
     Step currentStep;
+    SimpleExoPlayer player;
+    onNavClicked listener;
 
     public RecipeFragment() {
     }
@@ -45,6 +46,15 @@ public class RecipeFragment extends Fragment {
     @Override
     public void setArguments(@Nullable Bundle args) {
         currentStep = (Step) args.getSerializable("data");
+        listener = (onNavClicked) args.getSerializable("listener");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (!currentStep.getVideoURL().isEmpty())
+            player.stop();
     }
 
     @Override
@@ -53,38 +63,108 @@ public class RecipeFragment extends Fragment {
 
         Context context = getContext();
 
+
         View inflatedView = inflater.inflate(R.layout.fragment_recipe, container, false);
+
+        ImageView left = inflatedView.findViewById(R.id.navigation_left);
+        left.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onLeftClicked();
+            }
+        });
+        ImageView right = inflatedView.findViewById(R.id.navigation_right);
+        right.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onRightClicked();
+            }
+        });
 
         TextView descriptionTextView = inflatedView.findViewById(R.id.tv_recipe_description);
         descriptionTextView.setText(currentStep.getDescription());
 
-        Handler mainHandler = new Handler();
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector =
-                new DefaultTrackSelector(videoTrackSelectionFactory);
+        PlayerView playerView = inflatedView.findViewById(R.id.ex_player);
+        if (!currentStep.getVideoURL().isEmpty()) {
 
-        SimpleExoPlayer player =
-                ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+            Handler mainHandler = new Handler();
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector =
+                    new DefaultTrackSelector(videoTrackSelectionFactory);
+
+            player =
+                    ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+
+
+            playerView.setPlayer(player);
+
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
+                    Util.getUserAgent(context, "bakingapp"));
+
+            Uri uri = Uri.parse(currentStep.getVideoURL());
+            Log.v("URI", uri.toString());
+
+
+            MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
+
+            player.prepare(videoSource);
+
+        } else {
+            playerView.setVisibility(PlayerView.GONE);
+        }
+        return inflatedView;
+    }
+
+    public void setData(Step s) {
+
+        currentStep = s;
+
+        Context context = getContext();
+
+
+        View inflatedView = getView();
+
+        TextView descriptionTextView = inflatedView.findViewById(R.id.tv_recipe_description);
+        descriptionTextView.setText(currentStep.getDescription());
 
         PlayerView playerView = inflatedView.findViewById(R.id.ex_player);
+        if (!currentStep.getVideoURL().isEmpty()) {
 
-        playerView.setPlayer(player);
+            playerView.setVisibility(PlayerView.VISIBLE);
+            Handler mainHandler = new Handler();
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector =
+                    new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                Util.getUserAgent(context, "bakingapp"));
-
-        Uri uri = Uri.parse(currentStep.getVideoURL());
-        Log.v("URI",uri.toString());
+            player =
+                    ExoPlayerFactory.newSimpleInstance(context, trackSelector);
 
 
-        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
+            playerView.setPlayer(player);
 
-        player.prepare(videoSource);
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
+                    Util.getUserAgent(context, "bakingapp"));
 
-        player.setRepeatMode(Player.REPEAT_MODE_ONE);
+            Uri uri = Uri.parse(currentStep.getVideoURL());
+            Log.v("URI", uri.toString());
 
-        return inflatedView;
+
+            MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
+
+            player.prepare(videoSource);
+
+        } else {
+            playerView.setVisibility(PlayerView.GONE);
+        }
+    }
+
+    public interface onNavClicked extends Serializable {
+        public void onLeftClicked();
+
+        public void onRightClicked();
     }
 }
