@@ -118,7 +118,7 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    
+
                     clickListener.onItemClick(getLayoutPosition(),currentRecipe);
                 }
             });
