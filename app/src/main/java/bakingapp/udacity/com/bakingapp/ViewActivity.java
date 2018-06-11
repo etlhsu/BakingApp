@@ -9,5 +9,10 @@ public class ViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view);
+
+        RecipeFragment f = new RecipeFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.view_container,f)
+                .commit();
     }
 }
