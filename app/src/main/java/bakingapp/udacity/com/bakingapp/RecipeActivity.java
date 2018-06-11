@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 /**
  * Class that defines the RecipeActivity {@link android.support.v7.app.AppCompatActivity}.
-*/
+ */
 public class RecipeActivity extends AppCompatActivity {
 
     Recipe recipe;
@@ -29,18 +29,18 @@ public class RecipeActivity extends AppCompatActivity {
         SelectAdapter.OnItemClickListener listener = new SelectAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Integer position, Recipe currentRecipe) {
-            if(position != 0){
+                if (position != 0) {
                     Intent launchIntent = new Intent(RecipeActivity.this, ViewActivity.class);
-                    launchIntent.putExtra("data",currentRecipe.getSteps().get(position - 1));
+                    launchIntent.putExtra("data", currentRecipe.getSteps().get(position - 1));
                     startActivity(launchIntent);
                 }
             }
         };
-        b.putSerializable("listener",listener);
+        b.putSerializable("listener", listener);
         f.setArguments(b);
 
         fragmentManager.beginTransaction()
-                .add(R.id.container,f)
+                .add(R.id.container, f)
                 .commit();
     }
 }
