@@ -10,8 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 
 /**
@@ -31,22 +30,27 @@ public class SelectFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View returnView = inflater.inflate(R.layout.fragment_select,container);
+        View returnView = inflater.inflate(R.layout.fragment_select, container);
 
         RecyclerView list = returnView.findViewById(R.id.rv_info);
-        //Problem...
 
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         list.setHasFixedSize(true);
         list.setLayoutManager(manager);
-        Log.v("POINT","1");
-        if(currentRecipe != null){
-            RecyclerView.Adapter adapter = new SelectAdapter(getContext(),currentRecipe);
+
+        SelectAdapter.OnItemClickListener listener = new SelectAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Integer position, Recipe currentRecipe) {
+
+            }
+        };
+
+        if (currentRecipe != null) {
+            RecyclerView.Adapter adapter = new SelectAdapter(getContext(), currentRecipe, listener);
             list.setAdapter(adapter);
-            Log.v("AMOUNT",String.valueOf(list.getChildCount()));
-            Log.v("POINT","2");
         }
+
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }

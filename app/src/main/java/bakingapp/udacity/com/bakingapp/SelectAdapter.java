@@ -18,26 +18,30 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
     Recipe currentRecipe;
     Context context;
     LayoutInflater inflater;
+    OnItemClickListener onItemClickListener;
+
 
     /**
      * The constructor where an instance of {@link SelectAdapter} is made
      *
      * @param c A context to access tools with
      * @param r A recipe to be displayed
+     * @param o A listener that is triggered whenever an item is clicked
      */
-    public SelectAdapter(Context c, Recipe r) {
+    public SelectAdapter(Context c, Recipe r, OnItemClickListener o) {
         currentRecipe = r;
         context = c;
         inflater = LayoutInflater.from(c);
+        onItemClickListener = o;
     }
 
     @NonNull
     @Override
     public SelectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View creationView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.card_select, parent,false);
+                .inflate(R.layout.card_select, parent, false);
 
-        return new SelectViewHolder(creationView);
+        return new SelectViewHolder(creationView,onItemClickListener);
     }
 
 
@@ -74,8 +78,7 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
                 String currentText = currentIngredient.getQuantity().toString() + " " +
                         unitText + currentIngredient.getName() + "\n";
                 displayText = displayText.concat(currentText);
-                Log.v("TEXT",currentText);
-                Log.v("DISTEXT",displayText);
+
             }
             holder.getDescriptText().setText(displayText);
         } else {
@@ -100,15 +103,25 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
     }
 
 
-    public static class SelectViewHolder extends RecyclerView.ViewHolder {
+    public interface OnItemClickListener {
+        void onItemClick(Integer position, Recipe currentRecipe);
+    }
+
+    public class SelectViewHolder extends RecyclerView.ViewHolder {
         private TextView headText;
         private TextView descriptText;
 
-        public SelectViewHolder(View itemView) {
+        public SelectViewHolder(View itemView, final OnItemClickListener clickListener) {
             super(itemView);
             headText = itemView.findViewById(R.id.tv_header);
             descriptText = itemView.findViewById(R.id.tv_description);
-
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    
+                    clickListener.onItemClick(getLayoutPosition(),currentRecipe);
+                }
+            });
         }
 
         public TextView getHeadText() {
