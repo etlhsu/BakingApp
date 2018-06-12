@@ -25,6 +25,8 @@ public class RecipeActivity extends AppCompatActivity {
 
         recipe = (Recipe) getIntent().getSerializableExtra("data");
 
+        getSupportActionBar().setTitle(recipe.getName());
+
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
         Fragment f = new SelectFragment();

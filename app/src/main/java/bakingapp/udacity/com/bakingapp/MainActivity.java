@@ -45,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 listAdapter = new MainListAdapter(context,recipes);
+
+                if(getResources().getBoolean(R.bool.tabletState)){
+                    mainList.setNumColumns(3);
+                }
+
                 mainList.setAdapter(listAdapter);
             }
         }, null);
