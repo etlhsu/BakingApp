@@ -8,6 +8,7 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 }
 
@@ -22,4 +23,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.google.android.exoplayer:exoplayer-core:2.8.1'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.8.1'
+
+    implementation 'com.android.support:support-annotations:25.1.0'
+    implementation 'com.android.support.test.espresso:espresso-core:2.2.2'
 }
