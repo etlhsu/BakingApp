@@ -66,20 +66,23 @@ public class RecipeFragment extends Fragment {
 
         View inflatedView = inflater.inflate(R.layout.fragment_recipe, container, false);
 
-        ImageView left = inflatedView.findViewById(R.id.navigation_left);
-        left.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onLeftClicked();
-            }
-        });
-        ImageView right = inflatedView.findViewById(R.id.navigation_right);
-        right.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onRightClicked();
-            }
-        });
+        if(listener != null) {
+            ImageView left = inflatedView.findViewById(R.id.navigation_left);
+            left.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onLeftClicked();
+                }
+            });
+
+            ImageView right = inflatedView.findViewById(R.id.navigation_right);
+            right.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onRightClicked();
+                }
+            });
+        }
 
         TextView descriptionTextView = inflatedView.findViewById(R.id.tv_recipe_description);
         descriptionTextView.setText(currentStep.getDescription());

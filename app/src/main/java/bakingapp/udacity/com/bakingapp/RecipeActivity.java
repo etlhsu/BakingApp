@@ -25,7 +25,7 @@ public class RecipeActivity extends AppCompatActivity {
 
         recipe = (Recipe) getIntent().getSerializableExtra("data");
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        final FragmentManager fragmentManager = getSupportFragmentManager();
 
         Fragment f = new SelectFragment();
         Bundle b = new Bundle();
@@ -53,8 +53,27 @@ public class RecipeActivity extends AppCompatActivity {
                     .commit();
         }
         else{
+            final Boolean clicked = false;
+            SelectAdapter.OnItemClickListener listener  = new SelectAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(Integer position, Recipe currentRecipe) {
+                    if(position != 0) {
+                        RecipeFragment f = new RecipeFragment();
+                        Bundle b = new Bundle();
+                        b.putSerializable("data", currentRecipe.getSteps().get(position - 1));
+                        f.setArguments(b);
 
+                        if(clicked) {
+                            fragmentManager.beginTransaction().add(R.id.container_b, f).commit();
+                        }
+                        else{
+                            fragmentManager.beginTransaction().replace(R.id.container_b, f).commit();
+                        }
+                    }
+                }
+            };
             //Listener
+            b.putSerializable("listener",listener);
             f.setArguments(b);
 
             fragmentManager.beginTransaction()
