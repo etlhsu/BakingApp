@@ -64,7 +64,7 @@ public class MainListAdapter extends BaseAdapter {
             Picasso.get().load(data.get(position).getImage()).into(listHolder.recipeImage);
         }
         listHolder.nameText.setText(data.get(position).getName());
-        listHolder.servingsText.setText(data.get(position).getServings().toString());
+        listHolder.servingsText.setText(data.get(position).getServings().toString() + " Servings");
 
         Resources r = context.getResources();
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 365, r.getDisplayMetrics());

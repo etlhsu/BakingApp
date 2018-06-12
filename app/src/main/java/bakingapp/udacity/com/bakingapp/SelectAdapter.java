@@ -3,7 +3,6 @@ package bakingapp.udacity.com.bakingapp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +42,7 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
         View creationView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.card_select, parent, false);
 
-        return new SelectViewHolder(creationView,onItemClickListener);
+        return new SelectViewHolder(creationView, onItemClickListener);
     }
 
 
@@ -121,7 +120,9 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
                 @Override
                 public void onClick(View v) {
 
-                    clickListener.onItemClick(getLayoutPosition(),currentRecipe);
+                    if (clickListener != null) {
+                        clickListener.onItemClick(getLayoutPosition(), currentRecipe);
+                    }
                 }
             });
         }

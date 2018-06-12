@@ -14,12 +14,14 @@ import com.google.android.exoplayer2.ui.PlayerView;
  */
 public class RecipeActivity extends AppCompatActivity {
 
+    Boolean tabletState;
     Recipe recipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe);
+        tabletState = getResources().getBoolean(R.bool.tabletState);
 
         recipe = (Recipe) getIntent().getSerializableExtra("data");
 
@@ -29,22 +31,36 @@ public class RecipeActivity extends AppCompatActivity {
         Bundle b = new Bundle();
         b.putSerializable("data", recipe);
 
-        SelectAdapter.OnItemClickListener listener = new SelectAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Integer position, Recipe currentRecipe) {
-                if (position != 0) {
-                    Intent launchIntent = new Intent(RecipeActivity.this, ViewActivity.class);
-                    launchIntent.putExtra("data", currentRecipe);
-                    launchIntent.putExtra("start",position - 1);
-                    startActivity(launchIntent);
-                }
-            }
-        };
-        b.putSerializable("listener", listener);
-        f.setArguments(b);
+        if(!tabletState) {
 
-        fragmentManager.beginTransaction()
-                .add(R.id.container, f)
-                .commit();
+
+            SelectAdapter.OnItemClickListener listener = new SelectAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(Integer position, Recipe currentRecipe) {
+                    if (position != 0) {
+                        Intent launchIntent = new Intent(RecipeActivity.this, ViewActivity.class);
+                        launchIntent.putExtra("data", currentRecipe);
+                        launchIntent.putExtra("start", position - 1);
+                        startActivity(launchIntent);
+                    }
+                }
+            };
+            b.putSerializable("listener", listener);
+            f.setArguments(b);
+
+            fragmentManager.beginTransaction()
+                    .add(R.id.container, f)
+                    .commit();
+        }
+        else{
+
+            //Listener
+            f.setArguments(b);
+
+            fragmentManager.beginTransaction()
+                    .add(R.id.container_a, f)
+                    .commit();
+
+        }
     }
 }
