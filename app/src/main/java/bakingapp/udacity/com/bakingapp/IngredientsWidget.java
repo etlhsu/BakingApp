@@ -1,8 +1,11 @@
 package bakingapp.udacity.com.bakingapp;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.SimpleAdapter;
@@ -23,6 +26,9 @@ import java.util.Map;
  * App Widget Configuration implemented in {@link IngredientsWidgetConfigureActivity IngredientsWidgetConfigureActivity}
  */
 public class IngredientsWidget extends AppWidgetProvider {
+
+    public static final String EXTRA_ITEM = "bakingapp.udacity.com.bakingapp.EXTRA_ITEM";
+
 
     static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
                                 final int appWidgetId) {
@@ -52,7 +58,50 @@ public class IngredientsWidget extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(c.getPackageName(), R.layout.ingredients_widget);
         views.setTextViewText(R.id.widget_title, r.getName());
 
+        Intent intent = new Intent(c, ListViewWidgetService.class);
+
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id);
+        intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
+        intent.putExtra("data",parseIngredientData(r.getIngredients()));
+
+        views.setRemoteAdapter(id, R.id.widget_list, intent);
+//
+//        views.setEmptyView(R.id.widget_list, R.id.widget_card_layout);
+
         a.updateAppWidget(id, views);
+    }
+    static ArrayList<String> parseIngredientData(ArrayList<Ingredient> ingredients){
+        ArrayList<String> data = new ArrayList<>();
+        for (int i = 0; i < ingredients.size(); i++) {
+            Ingredient currentIngredient = ingredients.get(i);
+            String unitText = null;
+            switch (currentIngredient.getUnit()) {
+                case CUPS:
+                    unitText = "cup(s) ";
+                    break;
+                case TSP:
+                    unitText = "tablespoon(s) ";
+                    break;
+                case TBLSP:
+                    unitText = "teaspoon(s) ";
+                    break;
+                case K:
+                    unitText = "kilogram(s) ";
+                    break;
+                case G:
+                    unitText = "gram(s) ";
+                    break;
+                case OZ:
+                    unitText = "ounce(s) ";
+                case UNIT:
+                    unitText = "";
+            }
+            String currentText = currentIngredient.getQuantity().toString() + " " +
+                    unitText + currentIngredient.getName();
+            data.add(currentText);
+
+        }
+        return data;
     }
 
     @Override
