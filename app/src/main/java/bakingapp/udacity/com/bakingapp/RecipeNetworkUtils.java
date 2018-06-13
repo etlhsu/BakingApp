@@ -31,7 +31,7 @@ public class RecipeNetworkUtils {
      * @param errorListener    A listener to be triggered when an error has occurred
      * @return Void because the data is returned within the responseListener
      */
-    public static void getMoviesJson(Context context, Response.Listener<JSONArray> responseListener, Response.ErrorListener errorListener) {
+    public static void getRecipesJson(Context context, Response.Listener<JSONArray> responseListener, Response.ErrorListener errorListener) {
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, REQUEST_URL,
                 null, responseListener, errorListener);

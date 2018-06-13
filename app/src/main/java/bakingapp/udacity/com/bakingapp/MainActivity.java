@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
@@ -35,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mainList = findViewById(R.id.gv_recipes);
-        RecipeNetworkUtils.getMoviesJson(this, new Response.Listener<JSONArray>() {
+        RecipeNetworkUtils.getRecipesJson(this, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 ArrayList<Recipe> recipes = null;
