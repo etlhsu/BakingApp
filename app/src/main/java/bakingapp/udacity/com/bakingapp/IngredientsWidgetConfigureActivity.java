@@ -8,7 +8,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.AdapterView;
+import android.widget.GridView;
+
+import com.android.volley.Response;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.util.ArrayList;
 
 /**
  * The configuration screen for the {@link IngredientsWidget IngredientsWidget} AppWidget.
@@ -17,15 +25,22 @@ public class IngredientsWidgetConfigureActivity extends Activity {
 
     private static final String PREFS_NAME = "bakingapp.udacity.com.bakingapp.IngredientsWidget";
     private static final String PREF_PREFIX_KEY = "appwidget_";
+    ArrayList<Recipe> recipes;
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetText;
-    View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
+    GridView.OnItemClickListener listOnItemClickListener = new GridView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Context context = IngredientsWidgetConfigureActivity.this;
 
-            // When the button is clicked, store the string locally
-            String widgetText = mAppWidgetText.getText().toString();
-            saveWrapPref(context, mAppWidgetId, new RecipeWrapper(mAppWidgetId, "ingredients", "name"));
+            RecipeWrapper wrapper  = new RecipeWrapper(mAppWidgetId,
+                    IngredientsWidget.parseIngredientData(recipes.get(position).getIngredients()).toString(),
+                    recipes.get(position).getName());
+
+            try {
+                saveWrapPref(context, mAppWidgetId,wrapper);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -45,7 +60,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
     }
 
     // Write the prefix to the SharedPreferences object for this widget
-    static void saveWrapPref(final Context context, int appWidgetId, final RecipeWrapper wrapper) {
+    static void saveWrapPref(final Context context, int appWidgetId, final RecipeWrapper wrapper) throws InterruptedException {
         Runnable run = new Runnable() {
             @Override
             public void run() {
@@ -53,11 +68,12 @@ public class IngredientsWidgetConfigureActivity extends Activity {
                         AppDatabase.class, "recipewrapper").build();
                 final RecipeWrapperDao dao = db.recipeWrapperDao();
                 dao.insert(wrapper);
-
+                db.close();
             }
         };
         Thread newThread = new Thread(run, "WrapperThread");
         newThread.start();
+        newThread.join();
     }
 
     // Read the prefix from the SharedPreferences object for this widget.
@@ -71,6 +87,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
                         AppDatabase.class, "recipewrapper").build();
                 final RecipeWrapperDao dao = db.recipeWrapperDao();
                 wrapper[0] = dao.query(appWidgetId);
+                db.close();
 
             }
         };
@@ -80,7 +97,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
         return wrapper[0];
     }
 
-    static void deleteWrapperPref(final Context context, final int appWidgetId) {
+    static void deleteWrapperPref(final Context context, final int appWidgetId) throws InterruptedException {
         Runnable run = new Runnable() {
             @Override
             public void run() {
@@ -90,6 +107,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
                             AppDatabase.class, "recipewrapper").build();
                     final RecipeWrapperDao dao = db.recipeWrapperDao();
                     dao.delete(wrapper);
+                    db.close();
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -99,6 +117,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
         };
         Thread newThread = new Thread(run, "WrapperThread");
         newThread.start();
+        newThread.join();
     }
 
     @Override
@@ -110,8 +129,22 @@ public class IngredientsWidgetConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.ingredients_widget_configure);
-        mAppWidgetText = (EditText) findViewById(R.id.appwidget_text);
-        findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
+        final GridView grid = findViewById(R.id.widget_list_config);
+
+        final Context c = this;
+        RecipeNetworkUtils.getRecipesJson(this, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    recipes = RecipeNetworkUtils.parseRecipeJson(response);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                grid.setAdapter(new MainListAdapter(c, recipes));
+            }
+        }, null);
+
+        grid.setOnItemClickListener(listOnItemClickListener);
 
         // Find the widget id from the intent.
         Intent intent = getIntent();

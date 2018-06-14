@@ -27,36 +27,28 @@ public class IngredientsWidget extends AppWidgetProvider {
     static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
                                 final int appWidgetId) {
 
+        RecipeWrapper wrapper = null;
         try {
-            Log.v("LOADSTATE",IngredientsWidgetConfigureActivity.loadWrapperPref(context, appWidgetId).getIngredientData());
+            wrapper = IngredientsWidgetConfigureActivity.loadWrapperPref(context, appWidgetId);
+
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        updateAppInfo(wrapper, context, appWidgetManager, appWidgetId);
 
-        TestRecipeSet.returnTestIngredients(context, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                ArrayList<Recipe> recipes = new ArrayList<>();
-                try {
-                    recipes = RecipeNetworkUtils.parseRecipeJson(response);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                updateAppInfo(recipes.get(2), context, appWidgetManager, appWidgetId);
-            }
-        });
 
     }
 
-    static void updateAppInfo(Recipe r, Context c, AppWidgetManager a, int id) {
+    static void updateAppInfo(RecipeWrapper r, Context c, AppWidgetManager a, int id) {
         RemoteViews views = new RemoteViews(c.getPackageName(), R.layout.ingredients_widget);
-        views.setTextViewText(R.id.widget_title, r.getName());
+        views.setTextViewText(R.id.widget_title, r.getRecipeName());
 
         Intent intent = new Intent(c, ListViewWidgetService.class);
 
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id);
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-        intent.putExtra("data", parseIngredientData(r.getIngredients()));
+        intent.putExtra("data", r.getIngredientData());
 
         views.setRemoteAdapter(id, R.id.widget_list, intent);
 
@@ -102,7 +94,11 @@ public class IngredientsWidget extends AppWidgetProvider {
     public void onDeleted(Context context, int[] appWidgetIds) {
         // When the user deletes the widget, delete the preference associated with it.
         for (int appWidgetId : appWidgetIds) {
-            IngredientsWidgetConfigureActivity.deleteWrapperPref(context, appWidgetId);
+            try {
+                IngredientsWidgetConfigureActivity.deleteWrapperPref(context, appWidgetId);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
