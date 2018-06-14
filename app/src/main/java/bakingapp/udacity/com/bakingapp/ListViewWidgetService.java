@@ -15,7 +15,6 @@ public class ListViewWidgetService extends RemoteViewsService {
     public RemoteViewsService.RemoteViewsFactory onGetViewFactory(Intent intent) {
 
         ListViewRemoteViewsFactory factory = new ListViewRemoteViewsFactory(this.getApplicationContext());
-        Log.v("SIZE",String.valueOf(intent.getStringArrayListExtra("data").size()));
         factory.setData(intent.getStringArrayListExtra("data"));
         return factory;
 

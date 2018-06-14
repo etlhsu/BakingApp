@@ -1,6 +1,5 @@
 package bakingapp.udacity.com.bakingapp;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -8,18 +7,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.SimpleAdapter;
 
 import com.android.volley.Response;
-
-import junit.framework.Test;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Implementation of App Widget functionality.
@@ -33,13 +27,12 @@ public class IngredientsWidget extends AppWidgetProvider {
     static void updateAppWidget(final Context context, final AppWidgetManager appWidgetManager,
                                 final int appWidgetId) {
 
-//        CharSequence widgetText = IngredientsWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
-//        // Construct the RemoteViews object
-//        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.ingredients_widget);
-//        views.setTextViewText(R.id.appwidget_text, widgetText);
-//
-//        // Instruct the widget manager to update the widget
-//        appWidgetManager.updateAppWidget(appWidgetId, views);
+        try {
+            Log.v("LOADSTATE",IngredientsWidgetConfigureActivity.loadWrapperPref(context, appWidgetId).getIngredientData());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         TestRecipeSet.returnTestIngredients(context, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -49,12 +42,13 @@ public class IngredientsWidget extends AppWidgetProvider {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                updateAppInfo(recipes.get(2),context,appWidgetManager,appWidgetId);
+                updateAppInfo(recipes.get(2), context, appWidgetManager, appWidgetId);
             }
         });
 
     }
-    static void updateAppInfo(Recipe r, Context c, AppWidgetManager a, int id){
+
+    static void updateAppInfo(Recipe r, Context c, AppWidgetManager a, int id) {
         RemoteViews views = new RemoteViews(c.getPackageName(), R.layout.ingredients_widget);
         views.setTextViewText(R.id.widget_title, r.getName());
 
@@ -62,15 +56,15 @@ public class IngredientsWidget extends AppWidgetProvider {
 
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id);
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-        intent.putExtra("data",parseIngredientData(r.getIngredients()));
+        intent.putExtra("data", parseIngredientData(r.getIngredients()));
 
         views.setRemoteAdapter(id, R.id.widget_list, intent);
-//
-//        views.setEmptyView(R.id.widget_list, R.id.widget_card_layout);
+
 
         a.updateAppWidget(id, views);
     }
-    static ArrayList<String> parseIngredientData(ArrayList<Ingredient> ingredients){
+
+    static ArrayList<String> parseIngredientData(ArrayList<Ingredient> ingredients) {
         ArrayList<String> data = new ArrayList<>();
         for (int i = 0; i < ingredients.size(); i++) {
             Ingredient currentIngredient = ingredients.get(i);
@@ -108,7 +102,7 @@ public class IngredientsWidget extends AppWidgetProvider {
     public void onDeleted(Context context, int[] appWidgetIds) {
         // When the user deletes the widget, delete the preference associated with it.
         for (int appWidgetId : appWidgetIds) {
-            IngredientsWidgetConfigureActivity.deleteTitlePref(context, appWidgetId);
+            IngredientsWidgetConfigureActivity.deleteWrapperPref(context, appWidgetId);
         }
     }
 

@@ -2,10 +2,11 @@ package bakingapp.udacity.com.bakingapp;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -24,11 +25,12 @@ public class IngredientsWidgetConfigureActivity extends Activity {
 
             // When the button is clicked, store the string locally
             String widgetText = mAppWidgetText.getText().toString();
-            saveTitlePref(context, mAppWidgetId, widgetText);
+            saveWrapPref(context, mAppWidgetId, new RecipeWrapper(mAppWidgetId, "ingredients", "name"));
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             IngredientsWidget.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
@@ -43,28 +45,60 @@ public class IngredientsWidgetConfigureActivity extends Activity {
     }
 
     // Write the prefix to the SharedPreferences object for this widget
-    static void saveTitlePref(Context context, int appWidgetId, String text) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
-        prefs.apply();
+    static void saveWrapPref(final Context context, int appWidgetId, final RecipeWrapper wrapper) {
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                AppDatabase db = Room.databaseBuilder(context.getApplicationContext(),
+                        AppDatabase.class, "recipewrapper").build();
+                final RecipeWrapperDao dao = db.recipeWrapperDao();
+                dao.insert(wrapper);
+
+            }
+        };
+        Thread newThread = new Thread(run, "WrapperThread");
+        newThread.start();
     }
 
     // Read the prefix from the SharedPreferences object for this widget.
     // If there is no preference saved, get the default from a resource
-    static String loadTitlePref(Context context, int appWidgetId) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
-        if (titleValue != null) {
-            return titleValue;
-        } else {
-            return context.getString(R.string.appwidget_text);
-        }
+    static RecipeWrapper loadWrapperPref(final Context context, final int appWidgetId) throws InterruptedException {
+        final RecipeWrapper[] wrapper = new RecipeWrapper[1];
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                AppDatabase db = Room.databaseBuilder(context.getApplicationContext(),
+                        AppDatabase.class, "recipewrapper").build();
+                final RecipeWrapperDao dao = db.recipeWrapperDao();
+                wrapper[0] = dao.query(appWidgetId);
+
+            }
+        };
+        Thread newThread = new Thread(run, "WrapperThread");
+        newThread.start();
+        newThread.join();
+        return wrapper[0];
     }
 
-    static void deleteTitlePref(Context context, int appWidgetId) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.remove(PREF_PREFIX_KEY + appWidgetId);
-        prefs.apply();
+    static void deleteWrapperPref(final Context context, final int appWidgetId) {
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    RecipeWrapper wrapper = loadWrapperPref(context, appWidgetId);
+                    AppDatabase db = Room.databaseBuilder(context.getApplicationContext(),
+                            AppDatabase.class, "recipewrapper").build();
+                    final RecipeWrapperDao dao = db.recipeWrapperDao();
+                    dao.delete(wrapper);
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        Thread newThread = new Thread(run, "WrapperThread");
+        newThread.start();
     }
 
     @Override
@@ -93,7 +127,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
             return;
         }
 
-        mAppWidgetText.setText(loadTitlePref(IngredientsWidgetConfigureActivity.this, mAppWidgetId));
+        //mAppWidgetText.setText(loadWrapperPref(IngredientsWidgetConfigureActivity.this, mAppWidgetId));
     }
 }
 
