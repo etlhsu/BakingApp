@@ -4,9 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.android.volley.Response;
 
@@ -24,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     MainListAdapter listAdapter;
     Context context;
-    GridView mainList;
+    RecyclerView mainList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         context = this;
         setContentView(R.layout.activity_main);
 
-        mainList = findViewById(R.id.gv_recipes);
+        mainList = findViewById(R.id.rv_recipes);
         RecipeNetworkUtils.getRecipesJson(this, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -43,25 +42,32 @@ public class MainActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                listAdapter = new MainListAdapter(context,recipes);
+                listAdapter = new MainListAdapter(context, recipes, new MainListAdapter.MainListClick() {
+                    @Override
+                    public void onClick(int position) {
+                        Recipe currentRecipe = listAdapter.getItem(position);
+                        Intent launchIntent = new Intent(MainActivity.this,RecipeActivity.class);
+                        launchIntent.putExtra("data",currentRecipe);
+                        startActivity(launchIntent);
+                    }
+                });
+
 
                 if(getResources().getBoolean(R.bool.tabletState)){
-                    mainList.setNumColumns(3);
-                }
+                    GridLayoutManager manager = new GridLayoutManager(context,3);
 
+                    mainList.setLayoutManager(manager);
+                }
+                else {
+                    GridLayoutManager manager = new GridLayoutManager(context, 1);
+                    mainList.setLayoutManager(manager);
+                }
                 mainList.setAdapter(listAdapter);
+
+
+
             }
         }, null);
-
-        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Recipe currentRecipe = listAdapter.getItem(position);
-                Intent launchIntent = new Intent(MainActivity.this,RecipeActivity.class);
-                launchIntent.putExtra("data",currentRecipe);
-                startActivity(launchIntent);
-            }
-        });
 
 
     }

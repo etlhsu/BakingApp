@@ -12,7 +12,7 @@
         android:text="Choose Recipe"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"/>
 
-    <GridView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/widget_list_config"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -6,6 +6,7 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -129,7 +130,7 @@ public class IngredientsWidgetConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.ingredients_widget_configure);
-        final GridView grid = findViewById(R.id.widget_list_config);
+        final RecyclerView list = findViewById(R.id.widget_list_config);
 
         final Context c = this;
         RecipeNetworkUtils.getRecipesJson(this, new Response.Listener<JSONArray>() {
@@ -140,11 +141,14 @@ public class IngredientsWidgetConfigureActivity extends Activity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                grid.setAdapter(new MainListAdapter(c, recipes));
+                list.setAdapter(new MainListAdapter(c, recipes, new MainListAdapter.MainListClick() {
+                    @Override
+                    public void onClick(int position) {
+                        listOnItemClickListener.onItemClick(null,null,position,Long.valueOf(null));
+                    }
+                }));
             }
         }, null);
-
-        grid.setOnItemClickListener(listOnItemClickListener);
 
         // Find the widget id from the intent.
         Intent intent = getIntent();
