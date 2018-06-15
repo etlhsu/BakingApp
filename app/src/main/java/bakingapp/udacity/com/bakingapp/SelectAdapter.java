@@ -7,7 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.io.Serializable;
 
@@ -83,9 +86,16 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
             }
             holder.getDescriptText().setText(displayText);
         } else {
-            Step currentText = currentRecipe.getSteps().get(position - 1);
+            Step currentStep = currentRecipe.getSteps().get(position - 1);
             holder.getHeadText().setText("Step " + String.valueOf(position));
-            holder.getDescriptText().setText(currentText.getShortDescription());
+            holder.getDescriptText().setText(currentStep.getShortDescription());
+            if(!currentStep.getThumbnailURL().isEmpty()){
+                Picasso.get().load(currentStep.getThumbnailURL()).into(holder.thumb);
+                holder.thumb.setVisibility(View.VISIBLE);
+            }
+            else{
+                holder.thumb.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
@@ -111,11 +121,13 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
     public class SelectViewHolder extends RecyclerView.ViewHolder {
         private TextView headText;
         private TextView descriptText;
+        private ImageView thumb;
 
         public SelectViewHolder(View itemView, final OnItemClickListener clickListener) {
             super(itemView);
             headText = itemView.findViewById(R.id.tv_header);
             descriptText = itemView.findViewById(R.id.tv_description);
+            thumb = itemView.findViewById(R.id.iv_select_thumb);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

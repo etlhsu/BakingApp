@@ -4,9 +4,21 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:background="@drawable/bg"
     android:padding="16dp">
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/iv_select_thumb"
+        android:visibility="gone"
+        tools:src="@android:color/holo_blue_dark"/>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_weight="1">
 <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -21,5 +33,5 @@
         android:textAppearance="@android:style/TextAppearance.Material.Small"
         android:id="@+id/tv_description"
         tools:text="Step 2"/>
-
+    </LinearLayout>
 </LinearLayout>
