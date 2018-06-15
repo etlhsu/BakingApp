@@ -94,7 +94,7 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.SelectView
                 holder.thumb.setVisibility(View.VISIBLE);
             }
             else{
-                holder.thumb.setVisibility(View.INVISIBLE);
+                holder.thumb.setVisibility(View.GONE);
             }
         }
     }
