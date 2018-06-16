@@ -16,6 +16,7 @@ public class ViewActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putSerializable("recipe", currentRecipe);
         outState.putInt("position", position);
+        outState.putBoolean("added",true);
     }
 
     @Override
@@ -35,39 +36,37 @@ public class ViewActivity extends AppCompatActivity {
             position = savedInstanceState.getInt("position");
 
         }
-        RecipeFragment.onNavClicked listener = new RecipeFragment.onNavClicked() {
-            @Override
-            public void onLeftClicked() {
-                if (position != 0) {
-                    position -= 1;
-                    f.setData(currentRecipe.getSteps().get(position));
-                }
+        if (savedInstanceState == null) {
+
+                RecipeFragment.onNavClicked listener = new RecipeFragment.onNavClicked() {
+                    @Override
+                    public void onLeftClicked() {
+                        if (position != 0) {
+                            position -= 1;
+                            f.setData(currentRecipe.getSteps().get(position));
+                        }
+                    }
+
+                    @Override
+                    public void onRightClicked() {
+                        if (position != currentRecipe.getSteps().size() - 1) {
+                            position += 1;
+                            f.setData(currentRecipe.getSteps().get(position));
+                        }
+                    }
+                };
+
+                f = new RecipeFragment();
+                Bundle b = new Bundle();
+                b.putSerializable("data", currentRecipe.getSteps().get(position));
+                b.putSerializable("listener", listener);
+                f.setArguments(b);
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.view_container, f)
+                        .commit();
             }
 
-            @Override
-            public void onRightClicked() {
-                if (position != currentRecipe.getSteps().size() - 1) {
-                    position += 1;
-                    f.setData(currentRecipe.getSteps().get(position));
-                }
-            }
-        };
-
-        f = new RecipeFragment();
-        Bundle b = new Bundle();
-        b.putSerializable("data", currentRecipe.getSteps().get(position));
-        b.putSerializable("listener", listener);
-        f.setArguments(b);
-
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.view_container, f)
-                .commit();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getSupportFragmentManager().beginTransaction().remove(f).commit();
-        Log.v("STATE","IT RAN");
-    }
 }

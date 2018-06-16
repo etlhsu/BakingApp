@@ -28,9 +28,8 @@ public class GridExistsTest {
         //View
         onView((withId(R.id.rv_recipes))).check(matches(isDisplayed()));
 
-        //AdapterView
-        onData(anything()).inAdapterView(withId(R.id.rv_recipes)).perform(click());
-
+        //List child
+        onData(anything()).inAdapterView(withId(R.id.rv_recipes)).atPosition(0).onChildView(withId(R.id.tv_name));
 
     }
 

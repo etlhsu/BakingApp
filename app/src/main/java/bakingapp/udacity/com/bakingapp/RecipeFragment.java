@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -52,9 +54,25 @@ public class RecipeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if(player != null) {
+            player.release();
+        }
+    }
 
-        if (!currentStep.getVideoURL().isEmpty())
-            player.stop();
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Long position = player.getCurrentPosition();
+        outState.putLong("player",position);
+        outState.putSerializable("step",currentStep);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(player != null) {
+            player.setPlayWhenReady(true);
+        }
     }
 
     @Override
@@ -63,10 +81,12 @@ public class RecipeFragment extends Fragment {
 
         Context context = getContext();
 
-
+        if(savedInstanceState != null){
+            currentStep = (Step) savedInstanceState.getSerializable("step");
+        }
         View inflatedView = inflater.inflate(R.layout.fragment_recipe, container, false);
 
-        if(listener != null) {
+        if (listener != null) {
             ImageView left = inflatedView.findViewById(R.id.navigation_left);
             left.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -116,6 +136,10 @@ public class RecipeFragment extends Fragment {
 
         } else {
             playerView.setVisibility(PlayerView.GONE);
+        }
+        if(savedInstanceState != null){
+
+            player.seekTo(savedInstanceState.getLong("player"));
         }
         return inflatedView;
     }
