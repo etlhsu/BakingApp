@@ -6,6 +6,7 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -141,10 +142,19 @@ public class IngredientsWidgetConfigureActivity extends Activity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                if(getResources().getBoolean(R.bool.tabletState)){
+                    GridLayoutManager manager = new GridLayoutManager(getBaseContext(),3);
+
+                    list.setLayoutManager(manager);
+                }
+                else {
+                    GridLayoutManager manager = new GridLayoutManager(getBaseContext(), 1);
+                    list.setLayoutManager(manager);
+                }
                 list.setAdapter(new MainListAdapter(c, recipes, new MainListAdapter.MainListClick() {
                     @Override
                     public void onClick(int position) {
-                        listOnItemClickListener.onItemClick(null,null,position,Long.valueOf(null));
+                        listOnItemClickListener.onItemClick(null,null,position,0);
                     }
                 }));
             }
