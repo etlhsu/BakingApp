@@ -1,27 +1,30 @@
 package bakingapp.udacity.com.bakingapp;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
@@ -30,168 +33,215 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-import java.io.Serializable;
-
 
 /**
  * A {@link Fragment} that turns recipe data into the main view
  */
 public class RecipeFragment extends Fragment {
 
-    Step currentStep;
+
+    Boolean playState = true;
+    Recipe currentRecipe;
+    Integer stepPosition;
     SimpleExoPlayer player;
-    onNavClicked listener;
+    Player.EventListener listener = new Player.EventListener() {
+        @Override
+        public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+
+        }
+
+        @Override
+        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+        }
+
+        @Override
+        public void onLoadingChanged(boolean isLoading) {
+
+        }
+
+        @Override
+        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            playState = playWhenReady;
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+        }
+
+        @Override
+        public void onPlayerError(ExoPlaybackException error) {
+
+        }
+
+        @Override
+        public void onPositionDiscontinuity(int reason) {
+
+        }
+
+        @Override
+        public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+        }
+
+        @Override
+        public void onSeekProcessed() {
+
+        }
+    };
 
     public RecipeFragment() {
     }
 
     @Override
     public void setArguments(@Nullable Bundle args) {
-        currentStep = (Step) args.getSerializable("data");
-        listener = (onNavClicked) args.getSerializable("listener");
+        currentRecipe = (Recipe) args.getSerializable("data");
+        stepPosition = args.getInt("start");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(player != null) {
-            player.release();
-        }
+        player.stop();
+        player.release();
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         Long position = player.getCurrentPosition();
-        outState.putLong("player",position);
-        outState.putSerializable("step",currentStep);
+        outState.putLong("player", position);
+        outState.putBoolean("state", playState);
+        outState.putSerializable("data", currentRecipe);
+        outState.putInt("start", stepPosition);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(player != null) {
-            player.setPlayWhenReady(true);
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
 
-        Context context = getContext();
-
-        if(savedInstanceState != null){
-            currentStep = (Step) savedInstanceState.getSerializable("step");
+        Long playbackPosition = null;
+        if (savedInstanceState != null) {
+            currentRecipe = (Recipe) savedInstanceState.getSerializable("data");
+            stepPosition = savedInstanceState.getInt("start");
+            playState = savedInstanceState.getBoolean("state");
+            playbackPosition = savedInstanceState.getLong("player");
         }
-        View inflatedView = inflater.inflate(R.layout.fragment_recipe, container, false);
+        final Step currentStep = currentRecipe.getSteps().get(stepPosition);
 
-        if (listener != null) {
-            ImageView left = inflatedView.findViewById(R.id.navigation_left);
-            left.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onLeftClicked();
-                }
-            });
+        View convertView = inflater.inflate(R.layout.fragment_recipe, container, false);
 
-            ImageView right = inflatedView.findViewById(R.id.navigation_right);
-            right.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onRightClicked();
-                }
-            });
-        }
+        final PlayerView playerView = convertView.findViewById(R.id.ex_player);
 
-        TextView descriptionTextView = inflatedView.findViewById(R.id.tv_recipe_description);
-        descriptionTextView.setText(currentStep.getDescription());
+        Handler mainHandler = new Handler();
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        PlayerView playerView = inflatedView.findViewById(R.id.ex_player);
+        player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+
+
+        playerView.setPlayer(player);
+
         if (!currentStep.getVideoURL().isEmpty()) {
+            //If their is a video
 
-            Handler mainHandler = new Handler();
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelection.Factory videoTrackSelectionFactory =
-                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
-            TrackSelector trackSelector =
-                    new DefaultTrackSelector(videoTrackSelectionFactory);
-
-            player =
-                    ExoPlayerFactory.newSimpleInstance(context, trackSelector);
-
-
-            playerView.setPlayer(player);
-
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                    Util.getUserAgent(context, "bakingapp"));
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
+                    Util.getUserAgent(getContext(), "bakingapp"));
 
             Uri uri = Uri.parse(currentStep.getVideoURL());
-            Log.v("URI", uri.toString());
-
-
             MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
 
             player.prepare(videoSource);
 
-        } else {
-            playerView.setVisibility(PlayerView.GONE);
-        }
-        if(savedInstanceState != null){
+            if (savedInstanceState != null) {
+                player.seekTo(playbackPosition);
+                player.setPlayWhenReady(playState);
+            }
 
-            player.seekTo(savedInstanceState.getLong("player"));
-        }
-        return inflatedView;
-    }
-
-    public void setData(Step s) {
-
-        currentStep = s;
-
-        Context context = getContext();
-
-
-        View inflatedView = getView();
-
-        TextView descriptionTextView = inflatedView.findViewById(R.id.tv_recipe_description);
-        descriptionTextView.setText(currentStep.getDescription());
-
-        PlayerView playerView = inflatedView.findViewById(R.id.ex_player);
-        if (!currentStep.getVideoURL().isEmpty()) {
-
+            player.addListener(listener);
             playerView.setVisibility(PlayerView.VISIBLE);
-            Handler mainHandler = new Handler();
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelection.Factory videoTrackSelectionFactory =
-                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
-            TrackSelector trackSelector =
-                    new DefaultTrackSelector(videoTrackSelectionFactory);
-
-            player =
-                    ExoPlayerFactory.newSimpleInstance(context, trackSelector);
-
-
-            playerView.setPlayer(player);
-
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(context,
-                    Util.getUserAgent(context, "bakingapp"));
-
-            Uri uri = Uri.parse(currentStep.getVideoURL());
-            Log.v("URI", uri.toString());
-
-
-            MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
-
-            player.prepare(videoSource);
 
         } else {
             playerView.setVisibility(PlayerView.GONE);
         }
-    }
 
-    public interface onNavClicked extends Serializable {
-        public void onLeftClicked();
+        final TextView descriptionTextView = convertView.findViewById(R.id.tv_recipe_description);
+        descriptionTextView.setText(currentStep.getDescription());
 
-        public void onRightClicked();
+        //Listener navigation
+        ImageView left = convertView.findViewById(R.id.navigation_left);
+        left.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (stepPosition != 0) {
+                    stepPosition--;
+                    Step leftStep = currentRecipe.getSteps().get(stepPosition);
+                    if (!leftStep.getVideoURL().isEmpty()) {
+                        //If their is a video
+
+                        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
+                                Util.getUserAgent(getContext(), "bakingapp"));
+
+                        Uri uri = Uri.parse(leftStep.getVideoURL());
+                        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
+
+                        player.prepare(videoSource);
+
+                        player.addListener(listener);
+                        playerView.setVisibility(PlayerView.VISIBLE);
+
+                    } else {
+                        playerView.setVisibility(PlayerView.GONE);
+                    }
+
+                    descriptionTextView.setText(leftStep.getDescription());
+                }
+
+            }
+        });
+
+        ImageView right = convertView.findViewById(R.id.navigation_right);
+        right.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (stepPosition != currentRecipe.getSteps().size() - 1) {
+                    stepPosition++;
+                    Step rightStep = currentRecipe.getSteps().get(stepPosition);
+                    if (!rightStep.getVideoURL().isEmpty()) {
+                        //If their is a video
+
+                        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
+                                Util.getUserAgent(getContext(), "bakingapp"));
+
+                        Uri uri = Uri.parse(rightStep.getVideoURL());
+                        MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
+
+                        player.prepare(videoSource);
+
+                        player.addListener(listener);
+                        playerView.setVisibility(PlayerView.VISIBLE);
+
+                    } else {
+                        playerView.setVisibility(PlayerView.GONE);
+                    }
+
+                    descriptionTextView.setText(rightStep.getDescription());
+                }
+
+            }
+        });
+
+        return convertView;
     }
 }
+
