@@ -39,7 +39,8 @@ import com.google.android.exoplayer2.util.Util;
  */
 public class RecipeFragment extends Fragment {
 
-
+    Long playPosition;
+    Boolean resumeState = false;
     Boolean playState = true;
     Recipe currentRecipe;
     Integer stepPosition;
@@ -95,8 +96,61 @@ public class RecipeFragment extends Fragment {
 
         }
     };
+    PlayerView playerView;
 
     public RecipeFragment() {
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Step step = currentRecipe.getSteps().get(stepPosition);
+        //If their is a video to play
+        if (!step.getVideoURL().isEmpty()) {
+            //If the player was released
+            if (resumeState) {
+
+                Handler mainHandler = new Handler();
+                BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+                TrackSelection.Factory videoTrackSelectionFactory =
+                        new AdaptiveTrackSelection.Factory(bandwidthMeter);
+                TrackSelector trackSelector =
+                        new DefaultTrackSelector(videoTrackSelectionFactory);
+
+                player = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+
+                playerView.setPlayer(player);
+
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getContext(),
+                        Util.getUserAgent(getContext(), "bakingapp"));
+
+                Uri uri = Uri.parse(step.getVideoURL());
+                MediaSource videoSource = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
+
+                player.prepare(videoSource);
+
+                player.seekTo(playPosition);
+                resumeState = false;
+            }
+            player.setPlayWhenReady(playState);
+        }
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        player.stop();
+        player.release();
+        resumeState = true;
+        playPosition = player.getCurrentPosition();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        player.stop();
+        player.release();
     }
 
     @Override
@@ -138,7 +192,7 @@ public class RecipeFragment extends Fragment {
 
         View convertView = inflater.inflate(R.layout.fragment_recipe, container, false);
 
-        final PlayerView playerView = convertView.findViewById(R.id.ex_player);
+        playerView = convertView.findViewById(R.id.ex_player);
 
         Handler mainHandler = new Handler();
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
